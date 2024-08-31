@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class HelloController {
 
     private final TodoReminderProperties reminderProperties;
+
+    @Autowired
     private TodoConfig todoConfig;
 
     public HelloController(TodoReminderProperties reminderProperties) {
@@ -30,10 +32,5 @@ public class HelloController {
     @GetMapping("/randomNumber")
     public String getRandomNumber() {
         return String.valueOf(todoConfig.getRandomNumber());
-    }
-
-    @Autowired
-    public void setTodoConfig(TodoConfig todoConfig) {
-        this.todoConfig = todoConfig;
     }
 }
