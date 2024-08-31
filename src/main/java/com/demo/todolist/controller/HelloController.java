@@ -1,17 +1,17 @@
 package com.demo.todolist.controller;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.demo.todolist.config.TodoReminderProperties;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class HelloController {
 
-    @Value("${todo.reminder.threshold}")
-    private int reminderThreshold;
+    private final TodoReminderProperties reminderProperties;
 
-    @Value("${todo.reminder.message}")
-    private String reminderMessage;
+    public HelloController(TodoReminderProperties reminderProperties) {
+        this.reminderProperties = reminderProperties;
+    }
 
     @GetMapping("/")
     public String hello() {
@@ -20,6 +20,7 @@ public class HelloController {
 
     @GetMapping("/reminder-config")
     public String getReminderConfig() {
-        return "Threshold: " + reminderThreshold + ", Message: " + reminderMessage;
+        return "Threshold: " + reminderProperties.getThreshold() +
+                ", Message: " + reminderProperties.getMessage();
     }
 }
