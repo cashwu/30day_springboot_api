@@ -2,6 +2,7 @@ package com.demo.todolist.controller;
 
 import com.demo.todolist.config.TodoConfig;
 import com.demo.todolist.config.TodoReminderProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -9,12 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class HelloController {
 
     private final TodoReminderProperties reminderProperties;
-    private final TodoConfig todoConfig;
+    private TodoConfig todoConfig;
 
-    public HelloController(TodoReminderProperties reminderProperties,
-                           TodoConfig todoConfig) {
+    public HelloController(TodoReminderProperties reminderProperties) {
         this.reminderProperties = reminderProperties;
-        this.todoConfig = todoConfig;
     }
 
     @GetMapping("/")
@@ -31,5 +30,10 @@ public class HelloController {
     @GetMapping("/randomNumber")
     public String getRandomNumber() {
         return String.valueOf(todoConfig.getRandomNumber());
+    }
+
+    @Autowired
+    public void setTodoConfig(TodoConfig todoConfig) {
+        this.todoConfig = todoConfig;
     }
 }
