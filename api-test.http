@@ -84,3 +84,21 @@ POST http://localhost:8080/form04
 Content-Type: application/x-www-form-urlencoded
 
 title = abc04
+
+## request body
+
+### @RequestBody
+POST http://localhost:8080/body01
+Content-Type: application/json
+
+{
+  "title": "body 01"
+}
+
+###
+POST http://localhost:8080/body02
+Content-Type: application/json
+
+{
+  "title": "body 02"
+}

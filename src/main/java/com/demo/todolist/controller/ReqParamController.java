@@ -68,4 +68,15 @@ public class ReqParamController {
         String title = map.get("title").toString();
         return String.format("form04 - %s", title);
     }
+
+    @PostMapping("/body01")
+    public String body01(@RequestBody Todo todo) {
+        return String.format("body01 - %s", todo);
+    }
+
+    @PostMapping("/body02")
+    public String body02(@RequestBody Map<String, Object> map) {
+        String title = map.get("title").toString();
+        return String.format("body02 - %s", title);
+    }
 }
