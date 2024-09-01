@@ -1,0 +1,27 @@
+
+### 創建一個新的 Todo
+POST http://localhost:8080/api/todos
+Content-Type: application/json
+
+{
+  "title": "學習 Spring Boot",
+  "completed": false
+}
+
+### 獲取所有 Todo
+GET http://localhost:8080/api/todos
+
+### 獲取 ID 為 1 的 Todo
+GET http://localhost:8080/api/todos/1
+
+### 更新 ID 為 1 的 Todo
+PUT http://localhost:8080/api/todos/1
+Content-Type: application/json
+
+{
+  "title": "精通 Spring Boot",
+  "completed": true
+}
+
+### 刪除 ID 為 1 的 Todo
+DELETE http://localhost:8080/api/todos/1
