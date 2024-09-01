@@ -38,4 +38,13 @@ GET http://localhost:8080/query02?name={{$random.alphanumeric(8)}}
 ### @RequestParam with default
 GET http://localhost:8080/query03
 
+## Path Variables
 
+### @PathVariable
+GET http://localhost:8080/path01/{{$random.alphanumeric(8)}}
+
+### @PathVariable with defaut, it is worng way
+GET http://localhost:8080/path02/
+
+### @PathVariable with defaut, it is right way
+GET http://localhost:8080/path03

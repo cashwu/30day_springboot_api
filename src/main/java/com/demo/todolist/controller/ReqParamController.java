@@ -1,8 +1,6 @@
 package com.demo.todolist.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class ReqParamController {
@@ -20,5 +18,20 @@ public class ReqParamController {
     @GetMapping("/query03")
     public String query03(@RequestParam(required = false, defaultValue = "Guest") String name) {
         return String.format("query string - %s", name);
+    }
+
+    @GetMapping("/path01/{name}")
+    public String path01(@PathVariable String name) {
+        return String.format("path - %s", name);
+    }
+
+    @GetMapping("/path02/{name}")
+    public String path02(@PathVariable(required = false) String name) {
+        return String.format("path - %s", name != null ? name : "Unknown");
+    }
+
+    @GetMapping({"/path03/{name}", "/path03"})
+    public String path03(@PathVariable(required = false) String name) {
+        return String.format("path - %s", name != null ? name : "Unknown");
     }
 }
