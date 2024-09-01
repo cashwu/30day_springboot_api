@@ -48,3 +48,13 @@ GET http://localhost:8080/path02/
 
 ### @PathVariable with defaut, it is right way
 GET http://localhost:8080/path03
+
+## header and cookie
+
+### header
+GET http://localhost:8080/header
+name:1234
+
+### cookie
+GET http://localhost:8080/cookie
+Cookie: name=abc123

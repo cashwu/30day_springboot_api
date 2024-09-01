@@ -34,4 +34,14 @@ public class ReqParamController {
     public String path03(@PathVariable(required = false) String name) {
         return String.format("path - %s", name != null ? name : "Unknown");
     }
+
+    @GetMapping("/header")
+    public String header(@RequestHeader(required = false) String name) {
+        return String.format("header - %s", name);
+    }
+
+    @GetMapping("/cookie")
+    public String cookie(@CookieValue(required = false) String name) {
+        return String.format("cookie - %s", name);
+    }
 }
