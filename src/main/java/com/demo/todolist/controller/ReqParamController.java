@@ -1,6 +1,9 @@
 package com.demo.todolist.controller;
 
+import com.demo.todolist.model.Todo;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 public class ReqParamController {
@@ -43,5 +46,26 @@ public class ReqParamController {
     @GetMapping("/cookie")
     public String cookie(@CookieValue(required = false) String name) {
         return String.format("cookie - %s", name);
+    }
+
+    @PostMapping("/form01")
+    public String form01(String title) {
+        return String.format("form01 - %s", title);
+    }
+
+    @PostMapping("/form02")
+    public String form02(@RequestParam String title) {
+        return String.format("form02 - %s", title);
+    }
+
+    @PostMapping("/form03")
+    public String form03(Todo todo) {
+        return String.format("form03 - %s", todo);
+    }
+
+    @PostMapping("/form04")
+    public String form04(@RequestParam Map<String, Object> map) {
+        String title = map.get("title").toString();
+        return String.format("form04 - %s", title);
     }
 }

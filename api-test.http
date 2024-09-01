@@ -29,7 +29,7 @@ DELETE http://localhost:8080/api/todos/1
 
 ## Query String Parameter
 
-### 基本用法
+### default
 GET http://localhost:8080/query01?name={{$random.alphanumeric(8)}}
 
 ### @RequestParam
@@ -58,3 +58,29 @@ name:1234
 ### cookie
 GET http://localhost:8080/cookie
 Cookie: name=abc123
+
+## form data
+
+### default
+POST http://localhost:8080/form01
+Content-Type: application/x-www-form-urlencoded
+
+title = abc01
+
+### @RequestParam
+POST http://localhost:8080/form02
+Content-Type: application/x-www-form-urlencoded
+
+title = abc02
+
+### Object
+POST http://localhost:8080/form03
+Content-Type: application/x-www-form-urlencoded
+
+title = abc03
+
+### @RequestParam Map
+POST http://localhost:8080/form04
+Content-Type: application/x-www-form-urlencoded
+
+title = abc04
