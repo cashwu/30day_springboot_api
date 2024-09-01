@@ -41,48 +41,35 @@ public class TodoController {
         if (todo.isPresent()) {
             return ResponseEntity.ok(new ApiResponse<>(true, todo.get(), null));
         } else {
-            ApiResponse.ErrorDetails error = new ApiResponse.ErrorDetails(
-                    "https://example.com/errors/not-found",
-                    "Todo not found",
-                    HttpStatus.NOT_FOUND,
-                    MessageFormat.format("Todo with id {0} does not exist", id),
-                    MessageFormat.format("/api/todos/{0}", id)
-            );
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, error));
+            return createNotFoundError(id);
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Object>> updateTodo(@PathVariable Long id, @RequestBody Todo updatedTodo) {
+    public ResponseEntity<ApiResponse<Todo>> updateTodo(@PathVariable Long id, @RequestBody Todo updatedTodo) {
         for (int i = 0; i < todos.size(); i++) {
             if (todos.get(i).getId().equals(id)) {
                 updatedTodo.setId(id);
                 todos.set(i, updatedTodo);
-
                 return ResponseEntity.ok(new ApiResponse<>(true, updatedTodo, null));
             }
         }
 
-        ApiResponse.ErrorDetails error = new ApiResponse.ErrorDetails(
-                "https://example.com/errors/not-found",
-                "Todo not found",
-                HttpStatus.NOT_FOUND,
-                MessageFormat.format("Todo with id {0} does not exist", id),
-                MessageFormat.format("/api/todos/{0}", id)
-        );
-
-        return ResponseEntity.status(404).body(new ApiResponse<>(false, null, error));
+        return createNotFoundError(id);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Object>> deleteTodo(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Todo>> deleteTodo(@PathVariable Long id) {
         boolean isSuccess = todos.removeIf(todo -> todo.getId().equals(id));
 
         if (isSuccess) {
             return ResponseEntity.ok(new ApiResponse<>(true, null, null));
         }
 
+        return createNotFoundError(id);
+    }
+
+    private ResponseEntity<ApiResponse<Todo>> createNotFoundError(Long id) {
         ApiResponse.ErrorDetails error = new ApiResponse.ErrorDetails(
                 "https://example.com/errors/not-found",
                 "Todo not found",
@@ -90,7 +77,6 @@ public class TodoController {
                 MessageFormat.format("Todo with id {0} does not exist", id),
                 MessageFormat.format("/api/todos/{0}", id)
         );
-
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, error));
     }
 }
