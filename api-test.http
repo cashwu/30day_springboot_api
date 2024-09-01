@@ -27,8 +27,6 @@ Content-Type: application/json
 DELETE http://localhost:8080/api/todos/1
 
 
-## Query String Parameter
-
 ### default
 GET http://localhost:8080/query01?name={{$random.alphanumeric(8)}}
 
@@ -37,8 +35,6 @@ GET http://localhost:8080/query02?name={{$random.alphanumeric(8)}}
 
 ### @RequestParam with default
 GET http://localhost:8080/query03
-
-## Path Variables
 
 ### @PathVariable
 GET http://localhost:8080/path01/{{$random.alphanumeric(8)}}
@@ -49,8 +45,6 @@ GET http://localhost:8080/path02/
 ### @PathVariable with defaut, it is right way
 GET http://localhost:8080/path03
 
-## header and cookie
-
 ### header
 GET http://localhost:8080/header
 name:1234
@@ -58,8 +52,6 @@ name:1234
 ### cookie
 GET http://localhost:8080/cookie
 Cookie: name=abc123
-
-## form data
 
 ### default
 POST http://localhost:8080/form01
@@ -73,21 +65,19 @@ Content-Type: application/x-www-form-urlencoded
 
 title = abc02
 
-### Object
+### binding to object
 POST http://localhost:8080/form03
 Content-Type: application/x-www-form-urlencoded
 
 title = abc03
 
-### @RequestParam Map
+### @RequestParam bindint to map
 POST http://localhost:8080/form04
 Content-Type: application/x-www-form-urlencoded
 
 title = abc04
 
-## request body
-
-### @RequestBody
+### @RequestBody binding to object
 POST http://localhost:8080/body01
 Content-Type: application/json
 
@@ -95,10 +85,21 @@ Content-Type: application/json
   "title": "body 01"
 }
 
-###
+### @RequestBody binding to map
 POST http://localhost:8080/body02
 Content-Type: application/json
 
 {
   "title": "body 02"
 }
+
+### file
+POST http://localhost:8080/file
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="text.txt"
+Content-Type: text/plain
+
+i am file content
+--WebAppBoundary--

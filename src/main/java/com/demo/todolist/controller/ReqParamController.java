@@ -2,7 +2,10 @@ package com.demo.todolist.controller;
 
 import com.demo.todolist.model.Todo;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @RestController
@@ -78,5 +81,12 @@ public class ReqParamController {
     public String body02(@RequestBody Map<String, Object> map) {
         String title = map.get("title").toString();
         return String.format("body02 - %s", title);
+    }
+
+    @PostMapping("/file")
+    public String file(@RequestParam("file") MultipartFile uploadFile) throws IOException {
+        String filename = uploadFile.getOriginalFilename();
+        String content = new String(uploadFile.getBytes(), StandardCharsets.UTF_8);
+        return String.format("file name - %s, file content - %s", filename, content);
     }
 }
