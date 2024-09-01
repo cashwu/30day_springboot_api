@@ -25,3 +25,17 @@ Content-Type: application/json
 
 ### 刪除 ID 為 1 的 Todo
 DELETE http://localhost:8080/api/todos/1
+
+
+## Query String Parameter
+
+### 基本用法
+GET http://localhost:8080/query01?name={{$random.alphanumeric(8)}}
+
+### @RequestParam
+GET http://localhost:8080/query02?name={{$random.alphanumeric(8)}}
+
+### @RequestParam with default
+GET http://localhost:8080/query03
+
+
