@@ -1,0 +1,38 @@
+# iTHome 2024 鐵人賽 「Spring Boot API 開發：從 0 到 1」
+
+- Day 01 緣起：起心動念
+- Day 02 理解 Spring 和 Spring Boot
+- Day 03 建立你的第一個 Spring Boot 應用
+- Day 04 剖析 Spring Boot 專案結構
+- Day 05 Spring Boot Starters
+- Day 06 掌握 application.properties
+- Day 07 application.properties 多環境配置
+- Day 08 Spring 和 Spring Boot 中 Bean 的概念
+- Day 09 探討 Spring Boot 自動配置
+- Day 10 RESTful API 設計與實現
+- Day 11 請求參數處理深入探討
+- Day 12 統一 API 回應格式
+- Day 13 全域錯誤處理
+- Day 14 日誌配置與最佳實踐
+- Day 15 API 文檔自動化
+- Day 16 資料驗證
+- Day 17 Spring Boot 與 H2 資料庫
+- Day 18 JdbcTemplate
+- Day 19 Spring Data JDBC
+- Day 20 Spring Data JPA
+- Day 21 自定義查詢方法
+- Day 22 JPQL 與原生 SQL
+- Day 23 實現高效分頁與動態排序
+- Day 24 事務管理精要
+- Day 25 從記憶體中的 H2 到 PostgreSQL
+- Day 26 單元測試最佳實踐
+- Day 27 全上下文測試
+- Day 28 MockMVC 測試
+- Day 29 REST Assured
+- Day 30 跨域資源共享（CORS）
+- Day 31 Spring Security 基礎
+- Day 32 Spring Security 進階
+- Day 33 JWT 實現無狀態身分驗證
+- Day 34 OAuth 2.0 與 Spring Boot
+- Day 35 發佈 Spring Boot 軟體
+- Day 36 Spring Boot Actuator
