@@ -3,6 +3,8 @@ package com.demo.todolist.controller;
 import com.demo.todolist.exceptions.TodoNotFoundException;
 import com.demo.todolist.model.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -22,8 +24,13 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(TodoNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleTodoNotFoundException(TodoNotFoundException e) {
+
+        logger.error("todo not found exception occurred", e);
+
         ApiResponse.ErrorDetails error = new ApiResponse.ErrorDetails(
                 "https://example.com/errors/not-found",
                 "Todo not found",
@@ -36,6 +43,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
+
+        logger.error("Unhandled exception occurred", e);
 
         String apiPath = apiPath();
         ApiResponse.ErrorDetails error = new ApiResponse.ErrorDetails(
@@ -53,6 +62,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   HttpHeaders headers,
                                                                   HttpStatusCode status,
                                                                   WebRequest request) {
+
+        logger.error("http message not readable occurred", ex);
 
         ApiResponse.ErrorDetails error = new ApiResponse.ErrorDetails(
                 "https://example.com/errors/invalid-json",

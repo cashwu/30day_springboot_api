@@ -3,6 +3,8 @@ package com.demo.todolist.controller;
 import com.demo.todolist.exceptions.TodoNotFoundException;
 import com.demo.todolist.model.ApiResponse;
 import com.demo.todolist.model.Todo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,27 +22,32 @@ public class TodoController {
     private static final List<Todo> todos = new ArrayList<>();
     private static final AtomicLong idCounter = new AtomicLong();
 
+    private static final Logger logger = LoggerFactory.getLogger(TodoController.class);
+
     @PostMapping
     public ResponseEntity<ApiResponse<Todo>> createTodo(@RequestBody Todo todo) {
+        logger.info("create new todo: {}", todo);
+
         long id = idCounter.incrementAndGet();
         todo.setId(id);
         todos.add(todo);
-
-//        var a  = 0;
-//        var b = 1;
-//        var c = b / a;
 
         return ResponseEntity.ok(new ApiResponse<>(true, todo, null));
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<Todo>>> getAllTodos() {
+        logger.info("get all todo");
+
         return ResponseEntity.ok(new ApiResponse<>(true, todos, null));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Todo>> getTodo(@PathVariable Long id) throws
                                                                             TodoNotFoundException {
+
+        logger.info("get todo by id : {}", id);
+
         Optional<Todo> todo = todos.stream()
                 .filter(t -> t.getId().equals(id))
                 .findFirst();
@@ -55,6 +62,9 @@ public class TodoController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Todo>> updateTodo(@PathVariable Long id, @RequestBody Todo updatedTodo) {
+
+        logger.info("update todo, id : {}, todo : {}", id, updatedTodo);
+
         for (int i = 0; i < todos.size(); i++) {
             if (todos.get(i).getId().equals(id)) {
                 updatedTodo.setId(id);
@@ -68,6 +78,9 @@ public class TodoController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Todo>> deleteTodo(@PathVariable Long id) {
+
+        logger.info("delete todo by id : {}", id);
+
         boolean isSuccess = todos.removeIf(todo -> todo.getId().equals(id));
 
         if (isSuccess) {
