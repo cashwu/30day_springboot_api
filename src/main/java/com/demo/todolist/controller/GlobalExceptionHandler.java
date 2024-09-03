@@ -1,7 +1,7 @@
 package com.demo.todolist.controller;
 
 import com.demo.todolist.exceptions.TodoNotFoundException;
-import com.demo.todolist.model.ApiResponse;
+import com.demo.todolist.model.MyApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,34 +27,34 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(TodoNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleTodoNotFoundException(TodoNotFoundException e) {
+    public ResponseEntity<MyApiResponse<Void>> handleTodoNotFoundException(TodoNotFoundException e) {
 
         logger.error("todo not found exception occurred", e);
 
-        ApiResponse.ErrorDetails error = new ApiResponse.ErrorDetails(
+        MyApiResponse.ErrorDetails error = new MyApiResponse.ErrorDetails(
                 "https://example.com/errors/not-found",
                 "Todo not found",
                 HttpStatus.NOT_FOUND,
                 e.getMessage(),
                 apiPath()
         );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, error));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MyApiResponse<>(false, null, error));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
+    public ResponseEntity<MyApiResponse<Void>> handleException(Exception e) {
 
         logger.error("Unhandled exception occurred", e);
 
         String apiPath = apiPath();
-        ApiResponse.ErrorDetails error = new ApiResponse.ErrorDetails(
+        MyApiResponse.ErrorDetails error = new MyApiResponse.ErrorDetails(
                 "https://example.com/errors/internal-error",
                 "Internal Server Error",
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 e.getMessage(),
                 apiPath
         );
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(false, null, error));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MyApiResponse<>(false, null, error));
     }
 
     @Override
@@ -65,7 +65,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         logger.error("http message not readable occurred", ex);
 
-        ApiResponse.ErrorDetails error = new ApiResponse.ErrorDetails(
+        MyApiResponse.ErrorDetails error = new MyApiResponse.ErrorDetails(
                 "https://example.com/errors/invalid-json",
                 "無法解析請求內容",
                 HttpStatus.BAD_REQUEST,
@@ -73,7 +73,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 request.getDescription(false)
         );
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, null, error));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MyApiResponse<>(false, null, error));
     }
 
     private static String apiPath() {

@@ -2,12 +2,12 @@ package com.demo.todolist.model;
 
 import org.springframework.http.HttpStatus;
 
-public class ApiResponse<T> {
+public class MyApiResponse<T> {
     private boolean success;
     private T data;
     private ErrorDetails error;
 
-    public ApiResponse(boolean success, T data, ErrorDetails error) {
+    public MyApiResponse(boolean success, T data, ErrorDetails error) {
         this.success = success;
         this.data = data;
         this.error = error;
