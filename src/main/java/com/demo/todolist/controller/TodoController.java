@@ -1,5 +1,6 @@
 package com.demo.todolist.controller;
 
+import com.demo.todolist.exceptions.TodoNotFoundException;
 import com.demo.todolist.model.ApiResponse;
 import com.demo.todolist.model.Todo;
 import org.springframework.http.HttpStatus;
@@ -38,7 +39,8 @@ public class TodoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Todo>> getTodo(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Todo>> getTodo(@PathVariable Long id) throws
+                                                                            TodoNotFoundException {
         Optional<Todo> todo = todos.stream()
                 .filter(t -> t.getId().equals(id))
                 .findFirst();
@@ -46,7 +48,8 @@ public class TodoController {
         if (todo.isPresent()) {
             return ResponseEntity.ok(new ApiResponse<>(true, todo.get(), null));
         } else {
-            return createNotFoundError(id);
+            throw new TodoNotFoundException(id);
+//            return createNotFoundError(id);
         }
     }
 
@@ -85,15 +88,15 @@ public class TodoController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, error));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
-        ApiResponse.ErrorDetails error = new ApiResponse.ErrorDetails(
-                "https://example.com/errors/internal-error",
-                "Internal Server Error",
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                e.getMessage(),
-                "/api/todos"
-        );
-        return ResponseEntity.status(500).body(new ApiResponse<>(false, null, error));
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
+//        ApiResponse.ErrorDetails error = new ApiResponse.ErrorDetails(
+//                "https://example.com/errors/internal-error",
+//                "Internal Server Error",
+//                HttpStatus.INTERNAL_SERVER_ERROR,
+//                e.getMessage(),
+//                "/api/todos"
+//        );
+//        return ResponseEntity.status(500).body(new ApiResponse<>(false, null, error));
+//    }
 }

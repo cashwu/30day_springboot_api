@@ -33,4 +33,12 @@ public class HelloController {
     public String getRandomNumber() {
         return String.valueOf(todoConfig.getRandomNumber());
     }
+
+    @GetMapping("/ex")
+    public String ex() {
+        var a = 0;
+        var b = 1;
+        var c = b / a;
+        return "";
+    }
 }
