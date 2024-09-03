@@ -24,6 +24,11 @@ public class TodoController {
         long id = idCounter.incrementAndGet();
         todo.setId(id);
         todos.add(todo);
+
+//        var a  = 0;
+//        var b = 1;
+//        var c = b / a;
+
         return ResponseEntity.ok(new ApiResponse<>(true, todo, null));
     }
 
@@ -78,5 +83,17 @@ public class TodoController {
                 MessageFormat.format("/api/todos/{0}", id)
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false, null, error));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
+        ApiResponse.ErrorDetails error = new ApiResponse.ErrorDetails(
+                "https://example.com/errors/internal-error",
+                "Internal Server Error",
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                e.getMessage(),
+                "/api/todos"
+        );
+        return ResponseEntity.status(500).body(new ApiResponse<>(false, null, error));
     }
 }
