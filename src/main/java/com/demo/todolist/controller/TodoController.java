@@ -3,6 +3,7 @@ package com.demo.todolist.controller;
 import com.demo.todolist.exceptions.TodoNotFoundException;
 import com.demo.todolist.model.MyApiResponse;
 import com.demo.todolist.model.Todo;
+import com.demo.todolist.model.TodoValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,8 +13,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.MessageFormat;
@@ -21,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/todos")
@@ -32,6 +37,12 @@ public class TodoController {
 
     private static final Logger logger = LoggerFactory.getLogger(TodoController.class);
 
+    private TodoValidator todoValidator;
+
+    public TodoController(TodoValidator todoValidator) {
+        this.todoValidator = todoValidator;
+    }
+
     @PostMapping
     @Operation(summary = "建立新的待辦事項", description = "建立一個新的待辦事項並將其加入清單中",
     responses = {
@@ -41,8 +52,30 @@ public class TodoController {
     })
     public ResponseEntity<MyApiResponse<Todo>> createTodo(
             @Parameter(description = "待辦事項")
-            @Valid @RequestBody Todo todo) {
+            @Valid @RequestBody Todo todo,
+            BindingResult bindingResult) {
+
         logger.info("create new todo: {}", todo);
+
+        todoValidator.validate(todo, bindingResult);
+
+        if (bindingResult.hasErrors()) {
+            MyApiResponse.ErrorDetails error = new MyApiResponse.ErrorDetails(
+                    "https://example.com/errors/validation-error",
+                    "Validation Error",
+                    HttpStatus.BAD_REQUEST,
+                    "There were validation errors",
+                    "/api/todos"
+            );
+
+            List<String> errorMessages = bindingResult.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+
+            error.setValidationErrors(errorMessages);
+
+            return ResponseEntity.badRequest().body(new MyApiResponse<>(false, null, error));
+        }
 
         long id = idCounter.incrementAndGet();
         todo.setId(id);
