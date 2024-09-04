@@ -2,6 +2,8 @@ package com.demo.todolist.model;
 
 import org.springframework.http.HttpStatus;
 
+import java.util.List;
+
 public class MyApiResponse<T> {
     private boolean success;
     private T data;
@@ -43,6 +45,7 @@ public class MyApiResponse<T> {
         private HttpStatus status;
         private String detail;
         private String instance;
+        private List<String> validationErrors;
 
         public ErrorDetails(String type, String title, HttpStatus status, String detail, String instance) {
             this.type = type;
@@ -90,6 +93,14 @@ public class MyApiResponse<T> {
 
         public void setInstance(String instance) {
             this.instance = instance;
+        }
+
+        public List<String> getValidationErrors() {
+            return validationErrors;
+        }
+
+        public void setValidationErrors(List<String> validationErrors) {
+            this.validationErrors = validationErrors;
         }
     }
 }

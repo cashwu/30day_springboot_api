@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -40,7 +41,7 @@ public class TodoController {
     })
     public ResponseEntity<MyApiResponse<Todo>> createTodo(
             @Parameter(description = "待辦事項")
-            @RequestBody Todo todo) {
+            @Valid @RequestBody Todo todo) {
         logger.info("create new todo: {}", todo);
 
         long id = idCounter.incrementAndGet();

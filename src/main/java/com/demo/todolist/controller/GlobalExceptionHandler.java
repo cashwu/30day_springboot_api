@@ -10,12 +10,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author cash.wu
@@ -55,6 +59,32 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 apiPath
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MyApiResponse<>(false, null, error));
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+                                                                  HttpHeaders headers,
+                                                                  HttpStatusCode status,
+                                                                  WebRequest request) {
+
+        List<String> validationErrors = ex.getBindingResult()
+                                .getFieldErrors()
+                                .stream()
+                                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                                .collect(Collectors.toList());
+
+
+        MyApiResponse.ErrorDetails error = new MyApiResponse.ErrorDetails(
+                "https://example.com/errors/validation-error",
+                "Validation Error",
+                HttpStatus.BAD_REQUEST,
+                "請求參數驗證失敗",
+                request.getDescription(false)
+        );
+
+        error.setValidationErrors(validationErrors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MyApiResponse<>(false, null, error));
     }
 
     @Override

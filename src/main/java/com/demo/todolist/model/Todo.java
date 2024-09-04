@@ -1,9 +1,16 @@
 package com.demo.todolist.model;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class Todo {
 
     private Long id;
+
+    @NotBlank(message = "標題不能為空")
+    @Size(min = 1, max = 100, message = "標題長度必須在1到100個字符之間")
     private String title;
+
     private boolean completed;
 
     public Long getId() {
