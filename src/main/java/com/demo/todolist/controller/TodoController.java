@@ -37,20 +37,6 @@ public class TodoController {
 
     public TodoController(TodoValidator todoValidator) {
         this.todoValidator = todoValidator;
-        initDatabase();
-    }
-
-    private void initDatabase() {
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                Statement stmt = conn.createStatement()) {
-            String sql = "CREATE TABLE IF NOT EXISTS todos " +
-                    "(id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
-                    "title VARCHAR(255), " +
-                    "completed BOOLEAN)";
-            stmt.executeUpdate(sql);
-        } catch (SQLException e) {
-            logger.error("初始化資料庫失敗", e);
-        }
     }
 
     @PostMapping
