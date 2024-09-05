@@ -8,7 +8,7 @@ POST http://localhost:8080/api/todos
 Content-Type: application/json
 
 {
-  "title": "學習 Spring Boot - urgent",
+  "title": "學習 Spring Boot",
   "completed": false
 }
 
