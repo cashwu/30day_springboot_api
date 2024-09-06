@@ -2,9 +2,13 @@ package com.demo.todolist.model;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
+@Table("TODOS")
 public class Todo {
 
+    @Id
     private Long id;
 
     @NotBlank(message = "標題不能為空")
