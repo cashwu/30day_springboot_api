@@ -13,12 +13,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,15 +31,13 @@ import java.util.stream.Collectors;
 @Tag(name = "Todo", description = "待辦事項管理 API")
 public class TodoController {
 
-    private static final String DB_URL = "jdbc:h2:~/test";
-    private static final String DB_USER = "sa";
-    private static final String DB_PASSWORD = "";
-
     private static final Logger logger = LoggerFactory.getLogger(TodoController.class);
 
-    private TodoValidator todoValidator;
+    private final JdbcTemplate jdbcTemplate;
+    private final TodoValidator todoValidator;
 
-    public TodoController(TodoValidator todoValidator) {
+    public TodoController(JdbcTemplate jdbcTemplate, TodoValidator todoValidator) {
+        this.jdbcTemplate = jdbcTemplate;
         this.todoValidator = todoValidator;
     }
 
@@ -66,23 +68,20 @@ public class TodoController {
             return ResponseEntity.badRequest().body(new MyApiResponse<>(false, null, error));
         }
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement pstmt = conn.prepareStatement(
+        try {
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(
                         "INSERT INTO todos (title, completed) VALUES (?, ?)",
-                        Statement.RETURN_GENERATED_KEYS)) {
+                        Statement.RETURN_GENERATED_KEYS);
+                ps.setString(1, todo.getTitle());
+                ps.setBoolean(2, todo.isCompleted());
+                return ps;
+            }, keyHolder);
 
-            pstmt.setString(1, todo.getTitle());
-            pstmt.setBoolean(2, todo.isCompleted());
-            pstmt.executeUpdate();
-
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    todo.setId(generatedKeys.getLong(1));
-                }
-            }
-
+            todo.setId(keyHolder.getKey().longValue());
             return ResponseEntity.ok(new MyApiResponse<>(true, todo, null));
-        } catch (SQLException e) {
+        } catch (Exception e) {
             logger.error("創建待辦事項失敗", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MyApiResponse<>(false, null, new MyApiResponse.ErrorDetails(
@@ -99,21 +98,10 @@ public class TodoController {
     public ResponseEntity<MyApiResponse<List<Todo>>> getAllTodos() {
         logger.info("get all todo");
 
-        List<Todo> todos = new ArrayList<>();
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT * FROM todos")) {
-
-            while (rs.next()) {
-                Todo todo = new Todo();
-                todo.setId(rs.getLong("id"));
-                todo.setTitle(rs.getString("title"));
-                todo.setCompleted(rs.getBoolean("completed"));
-                todos.add(todo);
-            }
-
+        try {
+            List<Todo> todos = jdbcTemplate.query("SELECT * FROM todos", todoRowMapper());
             return ResponseEntity.ok(new MyApiResponse<>(true, todos, null));
-        } catch (SQLException e) {
+        } catch (Exception e) {
             logger.error("獲取所有待辦事項失敗", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MyApiResponse<>(false, null, new MyApiResponse.ErrorDetails(
@@ -130,22 +118,18 @@ public class TodoController {
     public ResponseEntity<MyApiResponse<Todo>> getTodo(@PathVariable Long id) throws TodoNotFoundException {
         logger.info("get todo by id : {}", id);
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM todos WHERE id = ?")) {
+        try {
+            Todo todo = jdbcTemplate.query(
+                    "SELECT * FROM todos WHERE id = ?",
+                    todoRowMapper(),
+                    id).get(0);
 
-            pstmt.setLong(1, id);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    Todo todo = new Todo();
-                    todo.setId(rs.getLong("id"));
-                    todo.setTitle(rs.getString("title"));
-                    todo.setCompleted(rs.getBoolean("completed"));
-                    return ResponseEntity.ok(new MyApiResponse<>(true, todo, null));
-                } else {
-                    throw new TodoNotFoundException(id);
-                }
+            if (todo == null) {
+                return createNotFoundError(id);
             }
-        } catch (SQLException e) {
+
+            return ResponseEntity.ok(new MyApiResponse<>(true, todo, null));
+        } catch (Exception e) {
             logger.error("獲取待辦事項失敗", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MyApiResponse<>(false, null, new MyApiResponse.ErrorDetails(
@@ -162,22 +146,18 @@ public class TodoController {
     public ResponseEntity<MyApiResponse<Todo>> updateTodo(@PathVariable Long id, @RequestBody Todo updatedTodo) {
         logger.info("update todo, id : {}, todo : {}", id, updatedTodo);
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement pstmt = conn.prepareStatement(
-                        "UPDATE todos SET title = ?, completed = ? WHERE id = ?")) {
+        try {
+            int affectedRows = jdbcTemplate.update(
+                    "UPDATE todos SET title = ?, completed = ? WHERE id = ?",
+                    updatedTodo.getTitle(), updatedTodo.isCompleted(), id);
 
-            pstmt.setString(1, updatedTodo.getTitle());
-            pstmt.setBoolean(2, updatedTodo.isCompleted());
-            pstmt.setLong(3, id);
-
-            int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
                 updatedTodo.setId(id);
                 return ResponseEntity.ok(new MyApiResponse<>(true, updatedTodo, null));
             } else {
                 return createNotFoundError(id);
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             logger.error("更新待辦事項失敗", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MyApiResponse<>(false, null, new MyApiResponse.ErrorDetails(
@@ -194,18 +174,15 @@ public class TodoController {
     public ResponseEntity<MyApiResponse<Todo>> deleteTodo(@PathVariable Long id) {
         logger.info("delete todo by id : {}", id);
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                PreparedStatement pstmt = conn.prepareStatement("DELETE FROM todos WHERE id = ?")) {
-
-            pstmt.setLong(1, id);
-            int affectedRows = pstmt.executeUpdate();
+        try {
+            int affectedRows = jdbcTemplate.update("DELETE FROM todos WHERE id = ?", id);
 
             if (affectedRows > 0) {
                 return ResponseEntity.ok(new MyApiResponse<>(true, null, null));
             } else {
                 return createNotFoundError(id);
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             logger.error("刪除待辦事項失敗", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new MyApiResponse<>(false, null, new MyApiResponse.ErrorDetails(
@@ -225,5 +202,15 @@ public class TodoController {
                 MessageFormat.format("Todo with id {0} does not exist", id),
                 MessageFormat.format("/api/todos/{0}", id));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MyApiResponse<>(false, null, error));
+    }
+
+    private RowMapper<Todo> todoRowMapper() {
+        return (rs, rowNum) -> {
+            Todo todo = new Todo();
+            todo.setId(rs.getLong("id"));
+            todo.setTitle(rs.getString("title"));
+            todo.setCompleted(rs.getBoolean("completed"));
+            return todo;
+        };
     }
 }
