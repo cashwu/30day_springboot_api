@@ -1,16 +1,16 @@
 package com.demo.todolist;
 
 import jakarta.annotation.PostConstruct;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DatabaseInitializer {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcClient jdbcClient;
 
-    public DatabaseInitializer(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public DatabaseInitializer(JdbcClient jdbcClient) {
+        this.jdbcClient = jdbcClient;
     }
 
     @PostConstruct
@@ -21,7 +21,7 @@ public class DatabaseInitializer {
                 "completed BOOLEAN NOT NULL)";
 
         try {
-            jdbcTemplate.execute(sql);
+            jdbcClient.sql(sql).update();
             System.out.println("初始化資料庫成功");
         } catch (Exception e) {
             System.err.println("初始化資料庫失敗：" + e.getMessage());

@@ -13,15 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,11 +30,11 @@ public class TodoController {
 
     private static final Logger logger = LoggerFactory.getLogger(TodoController.class);
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcClient jdbcClient;
     private final TodoValidator todoValidator;
 
-    public TodoController(JdbcTemplate jdbcTemplate, TodoValidator todoValidator) {
-        this.jdbcTemplate = jdbcTemplate;
+    public TodoController(JdbcClient jdbcClient, TodoValidator todoValidator) {
+        this.jdbcClient = jdbcClient;
         this.todoValidator = todoValidator;
     }
 
@@ -70,16 +67,14 @@ public class TodoController {
 
         try {
             KeyHolder keyHolder = new GeneratedKeyHolder();
-            jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(
-                        "INSERT INTO todos (title, completed) VALUES (?, ?)",
-                        Statement.RETURN_GENERATED_KEYS);
-                ps.setString(1, todo.getTitle());
-                ps.setBoolean(2, todo.isCompleted());
-                return ps;
-            }, keyHolder);
+            jdbcClient.sql("INSERT INTO todos (title, completed) VALUES (:title, :completed)")
+                    .param("title", todo.getTitle())
+                    .param("completed", todo.isCompleted())
+                    .update(keyHolder);
 
-            todo.setId(keyHolder.getKey().longValue());
+            Long id = keyHolder.getKey().longValue();
+
+            todo.setId(id);
             return ResponseEntity.ok(new MyApiResponse<>(true, todo, null));
         } catch (Exception e) {
             logger.error("創建待辦事項失敗", e);
@@ -99,7 +94,9 @@ public class TodoController {
         logger.info("get all todo");
 
         try {
-            List<Todo> todos = jdbcTemplate.query("SELECT * FROM todos", todoRowMapper());
+            List<Todo> todos = jdbcClient.sql("SELECT * FROM todos")
+                    .query(Todo.class)
+                    .list();
             return ResponseEntity.ok(new MyApiResponse<>(true, todos, null));
         } catch (Exception e) {
             logger.error("獲取所有待辦事項失敗", e);
@@ -119,10 +116,11 @@ public class TodoController {
         logger.info("get todo by id : {}", id);
 
         try {
-            Todo todo = jdbcTemplate.query(
-                    "SELECT * FROM todos WHERE id = ?",
-                    todoRowMapper(),
-                    id).get(0);
+            Todo todo = jdbcClient.sql("SELECT * FROM todos WHERE id = :id")
+                    .param("id", id)
+                    .query(Todo.class)
+                    .optional()
+                    .orElse(null);
 
             if (todo == null) {
                 return createNotFoundError(id);
@@ -147,9 +145,11 @@ public class TodoController {
         logger.info("update todo, id : {}, todo : {}", id, updatedTodo);
 
         try {
-            int affectedRows = jdbcTemplate.update(
-                    "UPDATE todos SET title = ?, completed = ? WHERE id = ?",
-                    updatedTodo.getTitle(), updatedTodo.isCompleted(), id);
+            int affectedRows = jdbcClient.sql("UPDATE todos SET title = :title, completed = :completed WHERE id = :id")
+                    .param("title", updatedTodo.getTitle())
+                    .param("completed", updatedTodo.isCompleted())
+                    .param("id", id)
+                    .update();
 
             if (affectedRows > 0) {
                 updatedTodo.setId(id);
@@ -175,7 +175,9 @@ public class TodoController {
         logger.info("delete todo by id : {}", id);
 
         try {
-            int affectedRows = jdbcTemplate.update("DELETE FROM todos WHERE id = ?", id);
+            int affectedRows = jdbcClient.sql("DELETE FROM todos WHERE id = :id")
+                    .param("id", id)
+                    .update();
 
             if (affectedRows > 0) {
                 return ResponseEntity.ok(new MyApiResponse<>(true, null, null));
@@ -202,15 +204,5 @@ public class TodoController {
                 MessageFormat.format("Todo with id {0} does not exist", id),
                 MessageFormat.format("/api/todos/{0}", id));
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MyApiResponse<>(false, null, error));
-    }
-
-    private RowMapper<Todo> todoRowMapper() {
-        return (rs, rowNum) -> {
-            Todo todo = new Todo();
-            todo.setId(rs.getLong("id"));
-            todo.setTitle(rs.getString("title"));
-            todo.setCompleted(rs.getBoolean("completed"));
-            return todo;
-        };
     }
 }
