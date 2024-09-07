@@ -67,6 +67,24 @@ public class TodoController {
         }
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<MyApiResponse<List<Todo>>> searchTodos(@RequestParam String keyword) {
+        List<Todo> todos = todoRepository.findByTitleContainingOrderByIdDesc(keyword);
+        return ResponseEntity.ok(new MyApiResponse<>(true, todos, null));
+    }
+
+    @GetMapping("/completed")
+    public ResponseEntity<MyApiResponse<List<Todo>>> getCompletedTodos() {
+        List<Todo> completedTodos = todoRepository.findByCompletedTrue();
+        return ResponseEntity.ok(new MyApiResponse<>(true, completedTodos, null));
+    }
+
+    @GetMapping("/count-incomplete")
+    public ResponseEntity<MyApiResponse<Long>> getIncompleteCount() {
+        long count = todoRepository.countByCompletedFalse();
+        return ResponseEntity.ok(new MyApiResponse<>(true, count, null));
+    }
+
     private ResponseEntity<MyApiResponse<Todo>> createNotFoundError(Long id) {
         MyApiResponse.ErrorDetails error = new MyApiResponse.ErrorDetails(
                 "https://example.com/errors/not-found",

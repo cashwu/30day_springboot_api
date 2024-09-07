@@ -16,19 +16,29 @@ Content-Type: application/json
 GET http://localhost:8080/api/todos
 
 ### 獲取 ID 為 1 的 Todo
-GET http://localhost:8080/api/todos/1
+GET http://localhost:8080/api/todos/4
 
 ### 更新 ID 為 1 的 Todo
-PUT http://localhost:8080/api/todos/1
+PUT http://localhost:8080/api/todos/7
 Content-Type: application/json
 
 {
-  "title": "精通 Spring Boot",
+  "title": "精通 Spring Boot cash",
   "completed": true
 }
 
 ### 刪除 ID 為 1 的 Todo
-DELETE http://localhost:8080/api/todos/1
+DELETE http://localhost:8080/api/todos/4
+
+
+### search
+GET http://localhost:8080/api/todos/search?keyword=cash
+
+### completd
+GET http://localhost:8080/api/todos/completed
+
+### count-incomplete
+GET http://localhost:8080/api/todos/count-incomplete
 
 
 ### default
