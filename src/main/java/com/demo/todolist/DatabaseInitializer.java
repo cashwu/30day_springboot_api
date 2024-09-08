@@ -16,7 +16,7 @@ public class DatabaseInitializer {
     @PostConstruct
     public void initDatabase() {
         String sql = "CREATE TABLE IF NOT EXISTS todos (" +
-                "id BIGINT AUTO_INCREMENT PRIMARY KEY," +
+                "id SERIAL PRIMARY KEY," +
                 "title VARCHAR(255) NOT NULL," +
                 "completed BOOLEAN NOT NULL)";
 

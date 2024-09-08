@@ -8,7 +8,7 @@ POST http://localhost:8080/api/todos
 Content-Type: application/json
 
 {
-  "title": "學習 Spring Boot 學習 Spring Boot",
+  "title": "學習 Spring Boot",
   "completed": false
 }
 
@@ -16,10 +16,10 @@ Content-Type: application/json
 GET http://localhost:8080/api/todos
 
 ### 獲取 ID 為 1 的 Todo
-GET http://localhost:8080/api/todos/4
+GET http://localhost:8080/api/todos/1
 
 ### 更新 ID 為 1 的 Todo
-PUT http://localhost:8080/api/todos/7
+PUT http://localhost:8080/api/todos/1
 Content-Type: application/json
 
 {
