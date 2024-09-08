@@ -6,6 +6,7 @@ import com.demo.todolist.model.Todo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -91,9 +92,17 @@ public class TodoController {
     @GetMapping("/paged")
     public ResponseEntity<MyApiResponse<Page<Todo>>> getPagedTodos(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "2") int size) {
+            @RequestParam(defaultValue = "2") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
 
-        Pageable pageable = PageRequest.of(page, size);
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+
+        Sort sort = Sort.by(sortDirection, sortBy);
+
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<Todo> todoPage = todoRepository.findAll(pageable);
 
         return ResponseEntity.ok(new MyApiResponse<>(true, todoPage, null));

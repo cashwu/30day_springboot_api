@@ -48,6 +48,16 @@ GET http://localhost:8080/api/todos/paged
 GET http://localhost:8080/api/todos/paged?page=1
 
 
+### paging and sort id desc
+GET http://localhost:8080/api/todos/paged?page=0&sortBy=id&direction=desc
+
+### paging and sort id desc, page 1
+GET http://localhost:8080/api/todos/paged?page=1&sortBy=id&direction=desc
+
+
+
+
+
 ### default
 GET http://localhost:8080/query01?name={{$random.alphanumeric(8)}}
 
