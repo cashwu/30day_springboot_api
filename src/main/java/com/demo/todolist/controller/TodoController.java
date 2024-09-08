@@ -3,6 +3,7 @@ package com.demo.todolist.controller;
 import com.demo.todolist.exceptions.TodoNotFoundException;
 import com.demo.todolist.model.MyApiResponse;
 import com.demo.todolist.model.Todo;
+import com.demo.todolist.services.TodoService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,22 +21,24 @@ import java.util.List;
 public class TodoController {
 
     private final TodoRepository todoRepository;
+    private final TodoService todoService;
 
-    public TodoController(TodoRepository todoRepository) {
+    public TodoController(TodoRepository todoRepository, TodoService todoService) {
         this.todoRepository = todoRepository;
+        this.todoService = todoService;
     }
 
     @PostMapping
     public ResponseEntity<MyApiResponse<Todo>> createTodo(@RequestBody Todo todo) {
 
-        Todo savedTodo = todoRepository.save(todo);
+        Todo savedTodo = todoService.save(todo);
         return ResponseEntity.ok(new MyApiResponse<>(true, savedTodo, null));
     }
 
     @GetMapping
     public ResponseEntity<MyApiResponse<List<Todo>>> getAllTodos() {
 
-        List<Todo> todos = (List<Todo>) todoRepository.findAll();
+        List<Todo> todos = todoService.findAll();
         return ResponseEntity.ok(new MyApiResponse<>(true, todos, null));
     }
 
