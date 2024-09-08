@@ -41,6 +41,13 @@ GET http://localhost:8080/api/todos/completed
 GET http://localhost:8080/api/todos/count-incomplete
 
 
+### paging
+GET http://localhost:8080/api/todos/paged
+
+### paging, page 1
+GET http://localhost:8080/api/todos/paged?page=1
+
+
 ### default
 GET http://localhost:8080/query01?name={{$random.alphanumeric(8)}}
 

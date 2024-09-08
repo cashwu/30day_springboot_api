@@ -3,6 +3,9 @@ package com.demo.todolist.controller;
 import com.demo.todolist.exceptions.TodoNotFoundException;
 import com.demo.todolist.model.MyApiResponse;
 import com.demo.todolist.model.Todo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -83,6 +86,17 @@ public class TodoController {
     public ResponseEntity<MyApiResponse<Long>> getIncompleteCount() {
         long count = todoRepository.countByCompletedFalse();
         return ResponseEntity.ok(new MyApiResponse<>(true, count, null));
+    }
+
+    @GetMapping("/paged")
+    public ResponseEntity<MyApiResponse<Page<Todo>>> getPagedTodos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "2") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Todo> todoPage = todoRepository.findAll(pageable);
+
+        return ResponseEntity.ok(new MyApiResponse<>(true, todoPage, null));
     }
 
     private ResponseEntity<MyApiResponse<Todo>> createNotFoundError(Long id) {
