@@ -5,14 +5,9 @@ import com.demo.todolist.model.MyApiResponse;
 import com.demo.todolist.model.Todo;
 import com.demo.todolist.services.TodoService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.demo.todolist.repository.TodoRepository;
-
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -20,54 +15,41 @@ import java.util.List;
 @RequestMapping("/api/todos")
 public class TodoController {
 
-    private final TodoRepository todoRepository;
     private final TodoService todoService;
 
-    public TodoController(TodoRepository todoRepository, TodoService todoService) {
-        this.todoRepository = todoRepository;
+    public TodoController(TodoService todoService) {
         this.todoService = todoService;
     }
 
     @PostMapping
     public ResponseEntity<MyApiResponse<Todo>> createTodo(@RequestBody Todo todo) {
-
         Todo savedTodo = todoService.save(todo);
         return ResponseEntity.ok(new MyApiResponse<>(true, savedTodo, null));
     }
 
     @GetMapping
     public ResponseEntity<MyApiResponse<List<Todo>>> getAllTodos() {
-
         List<Todo> todos = todoService.findAll();
         return ResponseEntity.ok(new MyApiResponse<>(true, todos, null));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MyApiResponse<Todo>> getTodo(@PathVariable Long id) throws TodoNotFoundException {
-
-        return todoRepository.findById(id)
+        return todoService.findById(id)
                 .map(todo -> ResponseEntity.ok(new MyApiResponse<>(true, todo, null)))
                 .orElse(createNotFoundError(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<MyApiResponse<Todo>> updateTodo(@PathVariable Long id, @RequestBody Todo updatedTodo) {
-
-        return todoRepository.findById(id)
-                .map(todo -> {
-                    todo.setTitle(updatedTodo.getTitle());
-                    todo.setCompleted(updatedTodo.isCompleted());
-                    Todo savedTodo = todoRepository.save(todo);
-                    return ResponseEntity.ok(new MyApiResponse<>(true, savedTodo, null));
-                })
+        return todoService.updateTodo(id, updatedTodo)
+                .map(todo -> ResponseEntity.ok(new MyApiResponse<>(true, todo, null)))
                 .orElse(createNotFoundError(id));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<MyApiResponse<Todo>> deleteTodo(@PathVariable Long id) {
-
-        if (todoRepository.existsById(id)) {
-            todoRepository.deleteById(id);
+        if (todoService.deleteTodo(id)) {
             return ResponseEntity.ok(new MyApiResponse<>(true, null, null));
         } else {
             return createNotFoundError(id);
@@ -76,19 +58,19 @@ public class TodoController {
 
     @GetMapping("/search")
     public ResponseEntity<MyApiResponse<List<Todo>>> searchTodos(@RequestParam String keyword) {
-        List<Todo> todos = todoRepository.findByTitleContainingOrderByIdDesc(keyword);
+        List<Todo> todos = todoService.searchByKeyword(keyword);
         return ResponseEntity.ok(new MyApiResponse<>(true, todos, null));
     }
 
     @GetMapping("/completed")
     public ResponseEntity<MyApiResponse<List<Todo>>> getCompletedTodos() {
-        List<Todo> completedTodos = todoRepository.findByCompletedTrue();
+        List<Todo> completedTodos = todoService.findCompletedTodos();
         return ResponseEntity.ok(new MyApiResponse<>(true, completedTodos, null));
     }
 
     @GetMapping("/count-incomplete")
     public ResponseEntity<MyApiResponse<Long>> getIncompleteCount() {
-        long count = todoRepository.countByCompletedFalse();
+        long count = todoService.countIncompleteTodos();
         return ResponseEntity.ok(new MyApiResponse<>(true, count, null));
     }
 
@@ -99,15 +81,7 @@ public class TodoController {
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String direction) {
 
-        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
-
-        Sort sort = Sort.by(sortDirection, sortBy);
-
-        Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Todo> todoPage = todoRepository.findAll(pageable);
-
+        Page<Todo> todoPage = todoService.getPagedTodos(page, size, sortBy, direction);
         return ResponseEntity.ok(new MyApiResponse<>(true, todoPage, null));
     }
 
