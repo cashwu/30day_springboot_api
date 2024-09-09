@@ -8,6 +8,17 @@ import jakarta.validation.constraints.Size;
 @Table(name = "TODOS")
 public class Todo {
 
+    public Todo() {
+    }
+
+    public Todo(Long id,
+                String title,
+                boolean completed) {
+        this.id = id;
+        this.title = title;
+        this.completed = completed;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

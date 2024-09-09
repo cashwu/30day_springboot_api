@@ -23,9 +23,7 @@ public class TodoService {
 
     @Transactional
     public Todo save(Todo todo) {
-        Todo savedTodo = todoRepository.save(todo);
-        performAdditionalOperations(savedTodo);
-        return savedTodo;
+        return todoRepository.save(todo);
     }
 
     @Transactional(readOnly = true)
