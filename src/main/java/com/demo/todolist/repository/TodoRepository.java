@@ -12,8 +12,7 @@ import java.util.List;
 public interface TodoRepository extends JpaRepository<Todo, Long> {
 
     // 根據標題查找待辦事項
-    @Query("SELECT t FROM Todo t WHERE t.title = :title")
-    List<Todo> findByTitle(@Param("title") String title);
+    List<Todo> findByTitle(String title);
 
     // 查找所有已完成的待辦事項
     @Query("SELECT t FROM Todo t WHERE t.completed = true")
