@@ -4,6 +4,8 @@ import com.demo.todolist.config.TodoConfig;
 import com.demo.todolist.config.TodoReminderProperties;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,16 +26,28 @@ public class HelloController {
         return "Hello World";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/api/hello")
     public String hello() {
         return "Hello from Spring Boot!";
     }
 
+    @GetMapping("/authInfo")
+    public String authInfo(Authentication auth) {
+
+        return "Authentication type: " + auth.getClass().getSimpleName()
+                + "\nName: " + auth.getName()
+                + "\nAuthorities: " + auth.getAuthorities()
+                + "\nDetails: " + auth.getDetails()
+                + "\nCredentials: " + auth.getCredentials()
+                + "\nPrincipal: " + auth.getPrincipal();
+    }
+
     @GetMapping("/reminder-config")
     @Hidden
     public String getReminderConfig() {
-        return "Threshold: " + reminderProperties.getThreshold() +
-                ", Message: " + reminderProperties.getMessage();
+        return "Threshold: " + reminderProperties.getThreshold() + ", Message: "
+                + reminderProperties.getMessage();
     }
 
     @GetMapping("/randomNumber")
