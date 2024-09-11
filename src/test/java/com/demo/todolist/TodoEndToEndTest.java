@@ -1,23 +1,21 @@
 package com.demo.todolist;
 
-import com.demo.todolist.model.MyApiResponse;
 import com.demo.todolist.model.Todo;
 import com.demo.todolist.repository.TodoRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Arrays;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "classpath:application-test.properties")
@@ -27,41 +25,32 @@ public class TodoEndToEndTest {
     private int port;
 
     @Autowired
-    private TestRestTemplate restTemplate;
-
-    @Autowired
     private TodoRepository todoRepository;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
+        RestAssured.port = port;
         todoRepository.deleteAll();
     }
 
     @Test
     void createTodo() {
 
-        // 呼叫 Api
-        String url = "http://localhost:" + port + "/api/todos";
         Todo newTodo = new Todo(null, "測試待辦事項", false);
-        var response = restTemplate.postForEntity(url, newTodo, MyApiResponse.class);
 
-        // 驗證 response 資料
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
+        // 呼叫 API
+        given().contentType(ContentType.JSON)
+               .body(newTodo)
+               .when()
+               .post("/api/todos")
+               .then()
+               .statusCode(200)
+               .body("success", equalTo(true))
+               .body("data.title", equalTo("測試待辦事項"))
+               .body("data.completed", equalTo(false));
 
-        Todo responseTodo = objectMapper.convertValue(response.getBody().getData(), new TypeReference<>() {});
-        assertEquals("測試待辦事項", responseTodo.getTitle());
-        assertFalse(responseTodo.isCompleted());
-
-        // 驗證 DB 資料
-        List<Todo> todos = todoRepository.findAll();
-        assertEquals(1, todos.size());
-        assertEquals("測試待辦事項", todos.get(0).getTitle());
-        assertFalse(todos.get(0).isCompleted());
+        // 驗證資料庫
+        assertThat(todoRepository.findAll()).hasSize(1);
     }
 
     @Test
@@ -72,21 +61,18 @@ public class TodoEndToEndTest {
         Todo todo2 = new Todo(null, "測試待辦事項2", true);
         todoRepository.saveAll(Arrays.asList(todo1, todo2));
 
-        // 呼叫 Api
-        var response = restTemplate.getForEntity("/api/todos", MyApiResponse.class);
-
-        // 驗證 response 資料
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-
-        List<Todo> todos = objectMapper.convertValue(response.getBody().getData(), new TypeReference<>() {});
-
-        assertEquals(2, todos.size());
-        assertEquals("測試待辦事項", todos.get(0).getTitle());
-        assertFalse(todos.get(0).isCompleted());
-        assertEquals("測試待辦事項2", todos.get(1).getTitle());
-        assertTrue(todos.get(1).isCompleted());
+        // 呼叫 API
+        given()
+                .when()
+                .get("/api/todos")
+                .then()
+                .statusCode(200)
+                .body("success", equalTo(true))
+                .body("data", hasSize(2))
+                .body("data[0].title", equalTo("測試待辦事項"))
+                .body("data[0].completed", equalTo(false))
+                .body("data[1].title", equalTo("測試待辦事項2"))
+                .body("data[1].completed", equalTo(true));
     }
 
     @Test
@@ -95,17 +81,15 @@ public class TodoEndToEndTest {
         // 新增測試資料
         Todo todo = todoRepository.save(new Todo(null, "測試待辦事項", false));
 
-        // 呼叫 Api
-        var response = restTemplate.getForEntity("/api/todos/" + todo.getId(), MyApiResponse.class);
-
-        // 驗證 response 資料
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-
-        Todo responseTodo = objectMapper.convertValue(response.getBody().getData(), new TypeReference<>() {});
-        assertEquals("測試待辦事項", responseTodo.getTitle());
-        assertFalse(responseTodo.isCompleted());
+        // 呼叫 API
+        given()
+                .when()
+                .get("/api/todos/{id}", todo.getId())
+                .then()
+                .statusCode(200)
+                .body("success", equalTo(true))
+                .body("data.title", equalTo("測試待辦事項"))
+                .body("data.completed", equalTo(false));
     }
 
     @Test
@@ -114,14 +98,21 @@ public class TodoEndToEndTest {
         // 新增測試資料
         Todo todo = todoRepository.save(new Todo(null, "原始待辦事項", false));
 
-        // 呼叫 Api
+        // 呼叫 API
         Todo updatedTodo = new Todo(todo.getId(), "更新後的待辦事項", true);
-        restTemplate.put("/api/todos/" + todo.getId(), updatedTodo);
 
-        // 驗證 DB 資料
-        Todo actualTodo = todoRepository.findById(todo.getId()).get();
-        assertEquals("更新後的待辦事項", actualTodo.getTitle());
-        assertTrue(actualTodo.isCompleted());
+        given()
+                .contentType(ContentType.JSON)
+                .body(updatedTodo)
+                .when()
+                .put("/api/todos/{id}", todo.getId())
+                .then()
+                .statusCode(200);
+
+        // 驗證資料庫
+        Todo actualTodo = todoRepository.findById(todo.getId()).orElseThrow();
+        assertThat(actualTodo.getTitle()).isEqualTo("更新後的待辦事項");
+        assertThat(actualTodo.isCompleted()).isTrue();
     }
 
     @Test
@@ -130,11 +121,14 @@ public class TodoEndToEndTest {
         // 新增測試資料
         Todo savedTodo = todoRepository.save(new Todo(null, "要刪除的待辦事項", false));
 
-        // 呼叫 Api
-        restTemplate.delete("/api/todos/" + savedTodo.getId());
+        // 呼叫 API
+        given()
+                .when()
+                .delete("/api/todos/{id}", savedTodo.getId())
+                .then()
+                .statusCode(200);
 
-        // 驗證 DB 資料
-        List<Todo> todos = todoRepository.findAll();
-        assertEquals(0, todos.size());
+        // 驗證資料庫
+        assertThat(todoRepository.findAll()).isEmpty();
     }
 }
