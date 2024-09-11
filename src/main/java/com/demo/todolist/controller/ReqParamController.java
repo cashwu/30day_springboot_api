@@ -8,9 +8,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+@CrossOrigin(origins = "https://example.com")
 @RestController
 public class ReqParamController {
 
+    @CrossOrigin(origins = "https://example.com")
     @GetMapping("/query01")
     public String query01(String name) {
         return String.format("query string - %s", name);

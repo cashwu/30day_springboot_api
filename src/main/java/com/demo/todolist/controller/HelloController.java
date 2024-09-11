@@ -20,8 +20,13 @@ public class HelloController {
     }
 
     @GetMapping("/")
-    public String hello() {
+    public String index() {
         return "Hello World";
+    }
+
+    @GetMapping("/api/hello")
+    public String hello() {
+        return "Hello from Spring Boot!";
     }
 
     @GetMapping("/reminder-config")
