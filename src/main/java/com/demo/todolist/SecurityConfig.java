@@ -52,28 +52,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-
-//        debug only
-//        String userEncodePw = passwordEncoder().encode("user123!");
-//        log.info("userEncodePw: {}", userEncodePw);
-
-        UserDetails user = User.builder()
-                .username("user")
-                .password(passwordEncoder().encode("user123!"))
-                .roles("USER")
-                .build();
-
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password(passwordEncoder().encode("admin123!"))
-                .roles("ADMIN", "USER")
-                .build();
-
-        return new InMemoryUserDetailsManager(user, admin);
-    }
-
-    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }

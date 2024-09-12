@@ -1,30 +1,46 @@
 package com.demo.todolist;
 
+import com.demo.todolist.model.User;
+import com.demo.todolist.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
-import org.springframework.jdbc.core.simple.JdbcClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
 
 @Component
 public class DatabaseInitializer {
 
-    private final JdbcClient jdbcClient;
+    private static final Logger log = LoggerFactory.getLogger(DatabaseInitializer.class);
 
-    public DatabaseInitializer(JdbcClient jdbcClient) {
-        this.jdbcClient = jdbcClient;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public DatabaseInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostConstruct
+    @Transactional
     public void initDatabase() {
-        String sql = "CREATE TABLE IF NOT EXISTS todos (" +
-                "id SERIAL PRIMARY KEY," +
-                "title VARCHAR(255) NOT NULL," +
-                "completed BOOLEAN NOT NULL)";
+        if (userRepository.count() == 0) {
+            User user = new User();
+            user.setUsername("user");
+            user.setPassword(passwordEncoder.encode("user123!"));
+            user.setRoles("USER");
 
-        try {
-            jdbcClient.sql(sql).update();
-            System.out.println("初始化資料庫成功");
-        } catch (Exception e) {
-            System.err.println("初始化資料庫失敗：" + e.getMessage());
+            User admin = new User();
+            admin.setUsername("admin");
+            admin.setPassword(passwordEncoder.encode("admin123!"));
+            admin.setRoles("ADMIN,USER");
+
+            userRepository.saveAll(Arrays.asList(user, admin));
+
+            log.info("Default users initialized successfully");
         }
     }
 }
