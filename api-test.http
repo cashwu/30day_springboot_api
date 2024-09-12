@@ -15,14 +15,13 @@ Authorization: Basic user user123!
 GET http://localhost:8080/api/hello
 Authorization: Basic admin admin123!
 
-
-
 ### ex
 
 GET http://localhost:8080/ex
 
 ### 創建一個新的 Todo
 POST http://localhost:8080/api/todos
+Authorization: Basic admin admin123!
 Content-Type: application/json
 
 {
@@ -32,12 +31,15 @@ Content-Type: application/json
 
 ### 獲取所有 Todo
 GET http://localhost:8080/api/todos
+Authorization: Basic admin admin123!
 
 ### 獲取 ID 為 1 的 Todo
 GET http://localhost:8080/api/todos/1
+Authorization: Basic admin admin123!
 
 ### 更新 ID 為 1 的 Todo
 PUT http://localhost:8080/api/todos/1
+Authorization: Basic admin admin123!
 Content-Type: application/json
 
 {
@@ -46,7 +48,8 @@ Content-Type: application/json
 }
 
 ### 刪除 ID 為 1 的 Todo
-DELETE http://localhost:8080/api/todos/4
+DELETE http://localhost:8080/api/todos/1
+Authorization: Basic admin admin123!
 
 
 ### search

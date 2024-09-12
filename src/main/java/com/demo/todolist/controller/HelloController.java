@@ -26,7 +26,7 @@ public class HelloController {
         return "Hello World";
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/api/hello")
     public String hello() {
         return "Hello from Spring Boot!";
