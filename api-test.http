@@ -2,19 +2,18 @@
 ### home
 
 GET http://localhost:8080
-#Authorization: Basic user 3c24f6a4-bba8-4377-b3db-060ed6210976
-Authorization: Basic cash abc123!
+Authorization: Basic user user123!
 
 ### authInfo
 
 GET http://localhost:8080/authInfo
-Authorization: Basic cash abc123!
+Authorization: Basic user user123!
 
 
 ### api/hello
 
 GET http://localhost:8080/api/hello
-Authorization: Basic cash abc123!
+Authorization: Basic admin admin123!
 
 
 
