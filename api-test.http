@@ -1,13 +1,26 @@
 
+### login get jwt
+
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+   "username": "user",
+   "password": "user123!"
+}
+
+
+
 ### home
 
 GET http://localhost:8080
-Authorization: Basic user user123!
+#Authorization: Basic user user123!
 
 ### authInfo
 
 GET http://localhost:8080/authInfo
-Authorization: Basic user user123!
+#Authorization: Basic user user123!
+Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ1c2VyIiwiaWF0IjoxNzI2MjI4ODQxLCJleHAiOjE3MjYzMTUyNDF9.Vxzxcjs1goN4it9XuxNyAJlt-UtUyDZflwI3oRspO7CXO1K5QOuqeY0XXlIob-9P
 
 
 ### api/hello
