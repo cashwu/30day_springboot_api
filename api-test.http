@@ -1,4 +1,23 @@
 
+### /actuator
+GET http://localhost:8080/actuator
+
+### /actuator/health：檢查應用健康狀況
+GET http://localhost:8080/actuator/health
+
+###	/actuator/info：顯示應用信息
+GET http://localhost:8080/actuator/info
+
+###	/actuator/metrics：查看應用指標
+GET http://localhost:8080/actuator/metrics
+
+###	/actuator/metrics：查看應用指標 cpu count
+GET http://localhost:8080/actuator/metrics/system.cpu.count
+
+###	/actuator/env：查看環境變量
+GET http://localhost:8080/actuator/env
+
+
 ### login get jwt
 
 POST http://localhost:8080/api/auth/login
