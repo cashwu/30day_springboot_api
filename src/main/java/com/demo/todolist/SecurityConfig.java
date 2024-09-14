@@ -41,7 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/hello").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults())
+//                .httpBasic(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin((form) -> form
                         .loginPage("/login")
