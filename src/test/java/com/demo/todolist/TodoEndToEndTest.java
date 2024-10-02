@@ -8,8 +8,10 @@ import com.demo.todolist.repository.UserRepository;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
+import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -61,22 +63,36 @@ public class TodoEndToEndTest {
     }
 
     @Test
-    void createTodo() {
+    void createTodo() throws JSONException {
 
         Todo newTodo = new Todo(null, "測試待辦事項", false);
 
         // 呼叫 API
-        given()
+        String result = given()
                 .contentType(ContentType.JSON).body(newTodo).when()
-                .post("/api/todos").then().statusCode(200).body("success", equalTo(true))
-                .body("data.title", equalTo("測試待辦事項")).body("data.completed", equalTo(false));
+                .post("/api/todos").then().statusCode(200)
+                .body("success", equalTo(true))
+                .body("data.title", equalTo("測試待辦事項")).body("data.completed", equalTo(false))
+                .extract().asString();
 
         // 驗證資料庫
         assertThat(todoRepository.findAll()).hasSize(1);
+
+        JSONAssert.assertEquals(
+                """ 
+                        {
+                          "success": true,
+                          "data" : {
+                            "title" : "測試待辦事項",
+                            "completed" : false
+                          }
+                        }
+                        """, result, false);
+
     }
 
     @Test
-    void getAllTodos() {
+    void getAllTodos() throws JSONException {
 
         // 新增測試資料
         Todo todo1 = new Todo(null, "測試待辦事項", false);
@@ -84,28 +100,58 @@ public class TodoEndToEndTest {
         todoRepository.saveAll(Arrays.asList(todo1, todo2));
 
         // 呼叫 API
-        given().auth().basic(username, password).when().get("/api/todos").then().statusCode(200)
+        var result = given().auth().basic(username, password).when().get("/api/todos").then().statusCode(200)
                 .body("success", equalTo(true)).body("data", hasSize(2))
                 .body("data[0].title", equalTo("測試待辦事項"))
                 .body("data[0].completed", equalTo(false))
                 .body("data[1].title", equalTo("測試待辦事項2"))
-                .body("data[1].completed", equalTo(true));
+                .body("data[1].completed", equalTo(true))
+                .extract().asString();
+
+        JSONAssert.assertEquals(
+                """ 
+                        {
+                          "success": true,
+                          "data" : [
+                          {
+                            "title" : "測試待辦事項",
+                            "completed" : false
+                          },
+                          {
+                            "title" : "測試待辦事項2",
+                            "completed" : true
+                          }
+                          ]
+                        }
+                        """, result, false);
     }
 
     @Test
-    void getTodo() {
+    void getTodo() throws JSONException {
 
         // 新增測試資料
         Todo todo = todoRepository.save(new Todo(null, "測試待辦事項", false));
 
         // 呼叫 API
-        given().auth().basic(username, password).when().get("/api/todos/{id}", todo.getId()).then()
+        var result = given().auth().basic(username, password).when().get("/api/todos/{id}", todo.getId()).then()
                 .statusCode(200).body("success", equalTo(true))
-                .body("data.title", equalTo("測試待辦事項")).body("data.completed", equalTo(false));
+                .body("data.title", equalTo("測試待辦事項")).body("data.completed", equalTo(false))
+                .extract().asString();
+
+        JSONAssert.assertEquals(
+                """ 
+                        {
+                          "success": true,
+                          "data" : {
+                            "title" : "測試待辦事項",
+                            "completed" : false
+                          }
+                        }
+                        """, result, false);
     }
 
     @Test
-    void updateTodo() {
+    void updateTodo() throws JSONException {
 
         // 新增測試資料
         Todo todo = todoRepository.save(new Todo(null, "原始待辦事項", false));
@@ -113,27 +159,48 @@ public class TodoEndToEndTest {
         // 呼叫 API
         Todo updatedTodo = new Todo(todo.getId(), "更新後的待辦事項", true);
 
-        given().auth().basic(username, password).contentType(ContentType.JSON).body(updatedTodo)
-                .when().put("/api/todos/{id}", todo.getId()).then().statusCode(200);
+        var result = given().auth().basic(username, password).contentType(ContentType.JSON).body(updatedTodo)
+                .when().put("/api/todos/{id}", todo.getId()).then().statusCode(200)
+                .extract().asString();
 
         // 驗證資料庫
         Todo actualTodo = todoRepository.findById(todo.getId()).orElseThrow();
         assertThat(actualTodo.getTitle()).isEqualTo("更新後的待辦事項");
         assertThat(actualTodo.isCompleted()).isTrue();
+
+        JSONAssert.assertEquals(
+                """ 
+                        {
+                          "success": true,
+                          "data" : {
+                            "title" : "更新後的待辦事項",
+                            "completed" : true
+                          }
+                        }
+                        """, result, false);
     }
 
     @Test
-    void testDeleteTodo() {
+    void testDeleteTodo() throws JSONException {
 
         // 新增測試資料
         Todo savedTodo = todoRepository.save(new Todo(null, "要刪除的待辦事項", false));
 
         // 呼叫 API
-        given().auth().basic(username, password).when().delete("/api/todos/{id}", savedTodo.getId())
-                .then().statusCode(200);
+        var result = given().auth().basic(username, password).when().delete("/api/todos/{id}", savedTodo.getId())
+                .then().statusCode(200)
+                .extract().asString();
 
         // 驗證資料庫
         assertThat(todoRepository.findAll()).isEmpty();
+
+        JSONAssert.assertEquals(
+                """ 
+                        {
+                          "success": true,
+                          "data" : null
+                        }
+                        """, result, false);
     }
 
     // 新增一個方法來獲取 JWT Token

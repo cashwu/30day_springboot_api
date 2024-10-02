@@ -45,6 +45,10 @@ dependencies {
 
     // https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+    // https://mvnrepository.com/artifact/org.skyscreamer/jsonassert
+    testImplementation 'org.skyscreamer:jsonassert:1.5.3'
+
 }
 
 tasks.named('test') {
